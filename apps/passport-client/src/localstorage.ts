@@ -3,6 +3,7 @@ import { PCDCollection } from "@pcd/pcd-collection";
 import { SemaphoreGroupPCDPackage } from "@pcd/semaphore-group-pcd";
 import { SemaphoreIdentityPCDPackage } from "@pcd/semaphore-identity-pcd";
 import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
+import { RLNPCDPackage } from "@pcd/rln-pcd";
 import { Identity } from "@semaphore-protocol/identity";
 import { config } from "./config";
 
@@ -28,11 +29,17 @@ export async function loadPCDs() {
     zkeyFilePath: SERVER_STATIC_URL + "/semaphore-artifacts/16.zkey",
   });
 
+  await RLNPCDPackage.init({
+    wasmFilePath: SERVER_STATIC_URL + "/rln-artifacts/16.wasm",
+    zkeyFilePath: SERVER_STATIC_URL + "/rln-artifacts/16.zkey",
+  })
+
   return await PCDCollection.deserialize(
     [
       SemaphoreGroupPCDPackage,
       SemaphoreIdentityPCDPackage,
       SemaphoreSignaturePCDPackage,
+      RLNPCDPackage,
     ],
     serialized
   );

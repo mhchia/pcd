@@ -44,6 +44,11 @@ export default function Page() {
               Semaphore Identity-Revealing Proof
             </a>
           </li>
+          <li>
+            <a href="/zuzalu-examples/rln-proof">
+              RLN Proof
+            </a>
+          </li>
         </ol>
       </div>
     </div>

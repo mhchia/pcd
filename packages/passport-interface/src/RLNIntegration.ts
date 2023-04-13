@@ -1,49 +1,58 @@
-import { ArgumentTypeName } from "@pcd/pcd-types";
+import { ArgumentTypeName, PCD } from "@pcd/pcd-types";
 import {
   deserializeSemaphoreGroup,
-  SemaphoreGroupPCD,
-  SemaphoreGroupPCDPackage,
   SerializedSemaphoreGroup,
 } from "@pcd/semaphore-group-pcd";
+import {
+  RLNPCDClaim,
+  RLNPCDPackage,
+  RLNPCDProof
+} from "@pcd/rln-pcd";
 import { useEffect, useState } from "react";
 import { constructPassportPcdGetRequestUrl } from "./PassportInterface";
 import { useProof } from "./PCDIntegration";
 
 
-export function requestZuzaluMembershipUrl(
+export function requestZuzaluRLNUrl(
   urlToPassportWebsite: string,
   returnUrl: string,
   urlToSemaphoreGroup: string,
-  externalNullifier?: string,
-  signal?: string,
+  rlnIdentifier: string,
+  signal: string,
+  epoch: string,
   proveOnServer?: boolean
 ) {
   const url = constructPassportPcdGetRequestUrl<
-    typeof SemaphoreGroupPCDPackage
+    typeof RLNPCDPackage
   >(
     urlToPassportWebsite,
     returnUrl,
-    SemaphoreGroupPCDPackage.name,
+    RLNPCDPackage.name,
     {
-      externalNullifier: {
+      rlnIdentifier: {
         argumentType: ArgumentTypeName.BigInt,
         userProvided: false,
-        value: externalNullifier ?? "1",
-      },
-      group: {
-        argumentType: ArgumentTypeName.Object,
-        userProvided: false,
-        remoteUrl: urlToSemaphoreGroup,
+        value: rlnIdentifier ?? "1",
       },
       identity: {
         argumentType: ArgumentTypeName.PCD,
         value: undefined,
         userProvided: true,
       },
+      group: {
+        argumentType: ArgumentTypeName.Object,
+        userProvided: false,
+        remoteUrl: urlToSemaphoreGroup,
+      },
       signal: {
-        argumentType: ArgumentTypeName.BigInt,
+        argumentType: ArgumentTypeName.String,
         userProvided: false,
         value: signal ?? "1",
+      },
+      epoch: {
+        argumentType: ArgumentTypeName.BigInt,
+        userProvided: false,
+        value: epoch ?? "1",
       },
     },
     {
@@ -54,22 +63,18 @@ export function requestZuzaluMembershipUrl(
   return url;
 }
 
-/**
- * React hook which can be used on 3rd party application websites that
- * parses and verifies a PCD representing a Semaphore group membership proof.
- */
-export function useSemaphorePassportProof(
+export function useRLNProof(
   semaphoreGroupUrl: string,
   proofStr: string
 ) {
   const [error, setError] = useState<Error | undefined>();
-  const semaphoreProof = useProof(SemaphoreGroupPCDPackage, proofStr);
+  const rlnProof = useProof(RLNPCDPackage, proofStr);
 
   // Meanwhile, load the group so that we can verify against it
   const [semaphoreGroup, setGroup] = useState<SerializedSemaphoreGroup>();
   useEffect(() => {
     (async () => {
-      if (!semaphoreProof) return;
+      if (!rlnProof) return;
 
       try {
         const res = await fetch(semaphoreGroupUrl);
@@ -80,34 +85,34 @@ export function useSemaphorePassportProof(
         setError(e as Error);
       }
     })();
-  }, [semaphoreProof, semaphoreGroupUrl]);
+  }, [rlnProof, semaphoreGroupUrl]);
 
   // Verify the proof
   const [semaphoreProofValid, setValid] = useState<boolean | undefined>();
   useEffect(() => {
-    if (semaphoreProof && semaphoreGroup) {
-      verifyProof(semaphoreProof, semaphoreGroup).then(setValid);
+    if (rlnProof && semaphoreGroup) {
+      verifyRLNProof(rlnProof, semaphoreGroup).then(setValid);
     }
-  }, [semaphoreProof, semaphoreGroup, setValid]);
+  }, [rlnProof, semaphoreGroup, setValid]);
 
   return {
-    proof: semaphoreProof,
+    proof: rlnProof,
     group: semaphoreGroup,
     valid: semaphoreProofValid,
     error,
   };
 }
 
-async function verifyProof(
-  pcd: SemaphoreGroupPCD,
+async function verifyRLNProof(
+  pcd: PCD<RLNPCDClaim, RLNPCDProof>,
   serializedExpectedGroup: SerializedSemaphoreGroup
 ): Promise<boolean> {
-  const { verify } = SemaphoreGroupPCDPackage;
+  const { verify } = RLNPCDPackage;
   const verified = await verify(pcd);
   if (!verified) return false;
 
   const expectedGroup = deserializeSemaphoreGroup(serializedExpectedGroup);
-  const pcdGroup = deserializeSemaphoreGroup(pcd.claim.group);
+  const merkleRoot = pcd.claim.merkleRoot;
 
-  return expectedGroup.root.toString() === pcdGroup.root.toString();
+  return expectedGroup.root.toString() === merkleRoot.toString();
 }

@@ -28,7 +28,6 @@ describe("rln-pcd should work", function () {
     const identity = new Identity();
     const group = new Group(1, TREE_DEPTH);
     group.addMember(identity.commitment);
-    const merkleProof = group.generateMerkleProof(0);
     const signal = "hey hey";
     const rlnIdentifier = BigInt(5566);
     const epoch = BigInt(42);
@@ -47,9 +46,9 @@ describe("rln-pcd should work", function () {
         argumentType: ArgumentTypeName.PCD,
         value: identityPCD,
       },
-      merkleProof: {
+      group: {
         argumentType: ArgumentTypeName.Object,
-        value: merkleProof,
+        value: group,
       },
       signal: {
         argumentType: ArgumentTypeName.String,
