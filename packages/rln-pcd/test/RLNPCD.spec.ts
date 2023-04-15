@@ -1,5 +1,6 @@
 import { ArgumentTypeName } from "@pcd/pcd-types";
 import { RLNPCDArgs, RLNPCDPackage } from "@pcd/rln-pcd";
+import { serializeSemaphoreGroup } from "@pcd/semaphore-group-pcd";
 import { SemaphoreIdentityPCDPackage } from "@pcd/semaphore-identity-pcd";
 import { Group } from "@semaphore-protocol/group";
 import { Identity } from "@semaphore-protocol/identity";
@@ -48,7 +49,7 @@ describe("rln-pcd should work", function () {
       },
       group: {
         argumentType: ArgumentTypeName.Object,
-        value: group,
+        value: serializeSemaphoreGroup(group, "test name"),
       },
       signal: {
         argumentType: ArgumentTypeName.String,
