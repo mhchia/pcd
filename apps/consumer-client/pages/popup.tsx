@@ -19,6 +19,10 @@ export default function AuthPopup() {
     const paramsProof = params.get("proof");
     const paramsEncodingPendingPCD = params.get("encodedPendingPCD");
 
+    // 1. open passport-client
+    // 2. passport-client redirects to consumer-client popup
+    // 3. consumer-client popup post message
+
     // First, this page is window.open()-ed. Redirect to the Passport app.
     if (paramsProofUrl != null) {
       window.location.href = decodeURIComponent(paramsProofUrl);
