@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { ArgumentTypeName } from "@pcd/pcd-types";
 import { RLNPCDArgs, RLNPCDPackage } from "@pcd/rln-pcd";
 import { serializeSemaphoreGroup } from "@pcd/semaphore-group-pcd";
@@ -60,6 +61,44 @@ describe("rln-pcd should work", function () {
         value: String(epoch),
       },
     };
+  });
+
+  it.only("tttt", async function () {
+    const url = "http://localhost:3002/semaphore/1"
+    const res = await axios({
+        method: 'GET',
+        timeout: 5000,
+        url,
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    });
+    const members: string[] = res.data.members;
+    const group = new Group(1, TREE_DEPTH);
+    group.addMembers(members);
+    const merkleRoot = group.root;
+    const zeroValue = group.zeroValue;
+    console.log("!@# members.length", members.length, ", members", members);
+    console.log("!@# zeroValue", String(zeroValue));
+
+    const slashedMembers = [
+      "6065765322932513336421378553112470671515818635033788234268171687431628809046",
+    ];
+
+    const membersAfterSlashing = members.map((member) => {
+      if (slashedMembers.includes(member)) {
+        return String(zeroValue);
+      }
+      return member;
+    });
+    if (membersAfterSlashing.length !== members.length) {
+      throw new Error("membersAfterSlashing.length !== members.length");
+    }
+    const slashedGroup = new Group(1, TREE_DEPTH);
+    slashedGroup.addMembers(membersAfterSlashing);
+    console.log("!@# merkleRoot", String(merkleRoot));
+    console.log("!@# slashedGroup.root", String(slashedGroup.root));
   });
 
   it("should be able to generate a proof that verifies", async function () {
