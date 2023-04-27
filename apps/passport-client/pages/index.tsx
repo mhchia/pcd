@@ -141,10 +141,10 @@ async function loadInitialState(): Promise<ZuState> {
   };
 }
 
-// Redirect old site visitors to the correct site
-if (!["zupass.org", "localhost"].includes(window.location.hostname)) {
-  window.location.replace("https://zupass.org/" + window.location.hash);
-}
+// // Redirect old site visitors to the correct site
+// if (!["zupass.org", "localhost"].includes(window.location.hostname)) {
+//   window.location.replace("https://zupass.org/" + window.location.hash);
+// }
 
 const root = createRoot(document.querySelector("#root"));
 root.render(
