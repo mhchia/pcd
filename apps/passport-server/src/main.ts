@@ -3,9 +3,7 @@ import * as path from "path";
 import { startApplication } from "./application";
 import { IS_PROD } from "./util/isProd";
 
-const dotEnvPath = IS_PROD
-  ? `/etc/secrets/.env`
-  : path.join(process.cwd(), ".env");
+const dotEnvPath = path.join(process.cwd(), ".env");
 
 console.log(`[INIT] Loading environment variables from: ${dotEnvPath} `);
 dotenv.config({ path: dotEnvPath });
