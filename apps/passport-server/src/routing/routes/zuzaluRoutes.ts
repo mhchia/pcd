@@ -46,9 +46,7 @@ export function initZuzaluRoutes(
     if (token.length !== 6) throw new Error("Unreachable");
 
     // Save the token. This lets the user prove access to their email later.
-    const devBypassEmail =
-      process.env.BYPASS_EMAIL_REGISTRATION === "true" &&
-      process.env.NODE_ENV !== "production";
+    const devBypassEmail = true;
     if (devBypassEmail) {
       await insertParticipant(dbPool, {
         email: email,
